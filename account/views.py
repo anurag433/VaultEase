@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from .models import UserAccount
-from .serializers import RegisterSerializers
+from .serializers import RegisterSerializers, DepositSerializer, WithdrawSerializer,TransferSerializer
 from rest_framework.permissions import  AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -45,38 +45,44 @@ class DepositAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        amount = request.data.get("amount", 0)
-        account = UserAccount.objects.get(user=request.user)
+        serializer = DepositSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            amount = serializer.validated_data.get('amount')
+            user = request.user
+            account = UserAccount.objects.get(user=user)
+            if amount <=0 :
+                return Response({"error": "Invalid amount . Please enter the valid amount"}, status=400)
 
-        if amount <=0 :
-            return Response({"error": "Invalid amount . Please enter the valid amount"}, status=400)
-        
-        account.balance += amount
-        account.save()
-        return Response({
-            "message": "Successfully Credited",
-            "deposited_amount": amount,
-            "current_balance": account.balance
-        })
+            account.balance += amount
+            account.save()
+            return Response({
+                "message": "Successfully Credited",
+                "deposited_amount": amount,
+                "current_balance": account.balance
+            })
+        return Response(serializer.errors, status=400)
 
 class WithdrawlAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        amount = request.data.get("amount", 0)
-        account = UserAccount.objects.get(user=request.user)
-
-        if amount <=0 :
-            return Response({"error": "Invalid amount . Please enter the valid amount"}, status=400)
-        if amount >= account.balance :
-            return Response({"error": "Insufficient balance"}, status=400)
-        account.balance -= amount
-        account.save()
-        return Response({
-            "message": "Successfully Debited",
-            "withdrawl_amount": amount,
-            "current_balance": account.balance
-        })
+        serializer = WithdrawSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            amount = serializer.validated_data.get('amount')
+            user = request.user
+            account = UserAccount.objects.get(user=user)
+            if amount <=0 :
+                return Response({"error": "Invalid amount . Please enter the valid amount"}, status=400)
+            if amount >= account.balance :
+                return Response({"error": "Insufficient balance"}, status=400)
+            account.balance -= amount
+            account.save()
+            return Response({
+                "message": "Successfully Debited",
+                "withdrawl_amount": amount,
+                "current_balance": account.balance
+            })
+        return Response(serializer.errors, status=400)
 
 class DeleteAccountAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -98,4 +104,11 @@ class DeleteAccountAPIView(APIView):
         user.delete()
         return Response ({"message" : "Your account is successfully deleted"})
 
-
+class TransferAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        serializer  = TransferSerializer(data= request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            account = UserAccount.objects.get(user = user)
