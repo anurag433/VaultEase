@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserAccount,Deposit, Transfer, Withdraw
+from .models import UserAccount,Deposit, Withdraw
 
 class RegisterSerializers(serializers.ModelSerializer):
     
@@ -47,8 +47,8 @@ class WithdrawSerializer(serializers.ModelSerializer):
             validated_data['account'] = UserAccount.objects.get(user=request.user)
         return super().create(validated_data)
 
-class TransferSerializer(serializers.ModelSerializer):
+class TransferSerializer(serializers.Serializer):
 
-    class Meta :
-        model = Transfer
-        fields = '__all__'
+    to_account = serializers.IntegerField()
+    amount = serializers.IntegerField()
+    password = serializers.CharField(write_only=True)

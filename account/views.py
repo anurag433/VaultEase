@@ -110,5 +110,31 @@ class TransferAPIView(APIView):
     def post(self, request):
         serializer  = TransferSerializer(data= request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            account = UserAccount.objects.get(user = user)
+            amount = serializer.validated_data.get('amount')
+            password = serializer.validated_data.get('password')
+            to_account_id = serializer.validated_data.get('to_account')
+
+            user = request.user
+            from_account = UserAccount.objects.get(user=user)
+            
+            try:
+                to_account= UserAccount.objects.get(id=to_account_id)
+                if to_account == from_account:
+                    return Response({"error": "You cannot transfer to your own account."}, status=400)
+            except UserAccount.DoesNotExist:
+                return Response({"error": "Account not found "}, status=400)
+            
+            if amount <=0 :
+                return Response({"error": "Invalid amount . Please enter the valid amount"}, status=400)
+            if amount >= from_account.balance :
+                return Response({"error": "Insufficient balance"}, status=400)
+            
+            if not user.check_password(password):
+                return Response({"error": "Incorrect password."})
+            
+            from_account.balance -= amount 
+            to_account.balance += amount
+            from_account.save()
+            to_account.save()
+            return Response ({"message" : "Money successfully transfered"})
+        return Response(serializer.errors, status=400)
