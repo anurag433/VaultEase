@@ -3,18 +3,23 @@ from django.contrib.auth.models import User
 from .models import UserAccount,Deposit, Withdraw
 
 class RegisterSerializers(serializers.ModelSerializer):
-    
-    class Meta :
-        model = User
-        fields = [ "username", "first_name" ,"last_name", "email", "password"]
+    username = serializers.CharField(required=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
-    def create(self,validated_data):
+    class Meta:
+        model = User
+        fields = ["username", "first_name", "last_name", "email", "password"]
+
+    def create(self, validated_data):
         return User.objects.create_user(
-            username=validated_data['username'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            email=validated_data['email'],
-            password=validated_data['password'],
+            username=validated_data["username"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            email=validated_data["email"],
+            password=validated_data["password"],
         )
     
 class UserAccountSerializer(serializers.ModelSerializer):

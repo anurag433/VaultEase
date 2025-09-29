@@ -5,6 +5,8 @@ from rest_framework.permissions import  AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
@@ -14,13 +16,15 @@ class RegisterAPIView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             account = UserAccount.objects.create(user=user)
-            token, created= Token.objects.get_or_create(user=user)
-            print(token.key)
+
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
             return Response({
-                "message" : "Account Created Sucessfully" ,
-                "Your Account No. :" : account.id ,
-                "token": token.key,
-                             
+                "message": "Account Created Successfully",
+                "Your Account No.": account.id,
+                "refresh": str(refresh),
+                "access": access_token,
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
