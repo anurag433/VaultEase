@@ -12,7 +12,7 @@ A comprehensive Bank Management System API built with **Django REST Framework (D
 - Secure token-based API access
 
 ### 💳 **Account Management**
-- ✅ **Create Accounts**: Customers can create multiple bank accounts
+- ✅ **Create Accounts**: Customers can open bank account
 - 👁️ **View Accounts**: Customers can view their own accounts
 - 💰 **Balance Tracking**: Monitor account balances
 
