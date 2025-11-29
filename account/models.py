@@ -17,4 +17,4 @@ class Transfer(models.Model):
     from_account = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name="sender")
     to_account = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name="receiver")
     amount = models.IntegerField()
-    
+

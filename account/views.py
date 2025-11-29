@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -19,6 +20,8 @@ class RegisterAPIView(APIView):
 
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
+            
+            
 
             return Response({
                 "message": "Account Created Successfully",
@@ -27,6 +30,8 @@ class RegisterAPIView(APIView):
                 "access": access_token,
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
     
 class DashboardAPIView(APIView):
     permission_classes = [IsAuthenticated]
